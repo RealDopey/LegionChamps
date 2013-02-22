@@ -278,6 +278,7 @@ public class Champion {
 	}
 
 	public void setLevel(int value) {
+		if(value > 200) value = 200;
 		level = value;
 	}
 

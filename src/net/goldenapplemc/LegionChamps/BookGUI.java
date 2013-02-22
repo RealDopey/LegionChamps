@@ -38,13 +38,18 @@ public class BookGUI implements Listener {
 		book.setTitle(ChatColor.LIGHT_PURPLE + "Champion Info");
 		book.setAuthor("The Legion Master");
 		// 26 spaces to a line
-		book.addPage("     " + ChatColor.UNDERLINE + "Your Champion\n\n" + ChatColor.RESET +
-		"     Health: " + c.getHp() + "/" + c.getMaxHp() + "\n\n" +
-		"     Regen: " + c.getRegen() + " HP/sec\n\n" +
-		"     Level: " + c.getLevel() + "\n\n" +
-		"     Exp: " + c.getExp() + "\n\n" +
-		"     Exp Needed: " + c.getExpRequiredForCurrentLevel() + "\n\n" +
-		centerLine("This is a test"));
+		// 19 anything else
+		book.addPage(" " + ChatColor.UNDERLINE + ChatColor.BOLD + "CHAMPION PROFILE" + ChatColor.RESET + " \n\n" +
+		"Name: " + c.name + "\n" +
+		ChatColor.BOLD + "MOTHER FUCKING ROCKSTAR\n" + 
+		ChatColor.BOLD + "Level " + ChatColor.RESET + c.getLevel() + "\n" +
+		" ----------------- " + "\n" +
+		ChatColor.BOLD + "HP: " + ChatColor.RESET + c.getHp() + "/" + c.getMaxHp() + "\n" +
+		ChatColor.BOLD + "Regen: " + ChatColor.RESET + c.getRegen() + "/s\n\n" +
+		ChatColor.BOLD + "STR: " + ChatColor.RESET + c.getStrength() + ChatColor.BOLD + "     PRE: " + ChatColor.RESET + c.getPrecision() + "\n" +
+		ChatColor.BOLD + "AGI: " + ChatColor.RESET + c.getAgility() + ChatColor.BOLD + "      END: " + ChatColor.RESET + c.getEndurance() +
+		" ----------------- " +
+		ChatColor.BOLD + "Gold: " + ChatColor.RESET + c.getGold());
 		bookItem.setItemMeta(book);
 		p.getInventory().addItem(bookItem);
 	}
