@@ -22,14 +22,14 @@ public class LegionChamps extends JavaPlugin implements Listener {
 		}.runTaskTimerAsynchronously(this, 20*60, 20*60);
 	}
 	public void onDisable() {
-		for (Champion c : this.champions.values()) {
+		for (Champion c : champions.values()) {
 			c.saveStatsToFile();
 		}
 	}
 
 	public Champion getChampion(String name) {
-		if (this.champions.containsKey(name)) {
-			return (Champion)this.champions.get(name);
+		if (champions.containsKey(name)) {
+			return (Champion)champions.get(name);
 		}
 		return new Champion(this, name);
 	}
@@ -37,7 +37,7 @@ public class LegionChamps extends JavaPlugin implements Listener {
 	@EventHandler(ignoreCancelled=true)
 	public void onJoin(PlayerJoinEvent event) {
 		String name = event.getPlayer().getName();
-		if (!this.champions.containsKey(name))
-			this.champions.put(name, new Champion(this, name));
+		if (!champions.containsKey(name))
+			champions.put(name, new Champion(this, name));
 	}
 }

@@ -44,8 +44,7 @@ public class Champion {
 	private HashMap<String, Integer> mobTypesKilled = new HashMap<String, Integer>();
 	private int bossesKilled = 0;
 
-	public Champion(LegionChamps plugin, String name)
-	{
+	public Champion(LegionChamps plugin, String name) {
 		this.plugin = plugin;
 		this.name = name;
 		config = plugin.getConfig();
@@ -139,8 +138,8 @@ public class Champion {
 		for (String s : mobTypesKilled.keySet()) {
 			yml.set("MobTypesKilled." + s, mobTypesKilled.get(s));
 		}
-		if (mobTypesKilled.isEmpty()) yml.set("MobTypesKilled", "none"); try
-		{
+		if (mobTypesKilled.isEmpty()) yml.set("MobTypesKilled", "none"); 
+		try {
 			yml.save(file);
 		} catch (IOException e) {
 			plugin.getLogger().severe("Error saving Champion file for: " + name);
@@ -165,6 +164,7 @@ public class Champion {
 		dodge = yml.getInt("DodgeChance");
 		itemFind = yml.getInt("ItemFind");
 		goldFind = yml.getInt("GoldFind");
+		
 		damageDone = yml.getInt("DamageDone");
 		expGained = yml.getInt("ExpGained");
 		playersKilled = yml.getInt("PlayersKilled");
@@ -186,10 +186,12 @@ public class Champion {
 				mobTypesKilled.put(s, yml.getInt("MobTypesKilled." + s));
 			}
 		}
+		else {
+			mobTypesKilled.clear();
+		}
 	}
 
-	public int getStrength()
-	{
+	public int getStrength() {
 		return strength;
 	}
 
