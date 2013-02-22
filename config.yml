@@ -1,0 +1,13 @@
+Default_Stats:
+  Strength: 1
+  Agility: 1
+  Endurance: 1
+  Precision: 1
+  Health: 20
+  MaxHealth: 20
+  Regen: 2
+  CritChance: 0.0
+  DodgeChance: 0.0
+  ItemFind: 1.0
+  GoldFind: 1.0
+  

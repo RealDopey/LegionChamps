@@ -52,15 +52,16 @@ public class Champion {
 	}
 
 	public boolean hasFile() {
-		File file = new File(plugin.getDataFolder(), "/Champions/" + name + ".yml");
+		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
 		if (file.exists()) return true;
 		return false;
 	}
 
 	public void createFile() {
 		if (hasFile()) return;
-		File file = new File(plugin.getDataFolder(), "/Champions/" + name + ".yml");
+		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
 		try {
+			file.getParentFile().mkdirs();
 			file.createNewFile();
 			FileConfiguration yml = YamlConfiguration.loadConfiguration(file);
 			ConfigurationSection stats = config.getConfigurationSection("Default_Stats");
@@ -95,6 +96,7 @@ public class Champion {
 			yml.set("TotalMobsKilled", 0);
 			yml.set("BossesKilled", 0);
 			yml.set("MobTypesKilled", "none");
+			yml.save(file);
 		} catch (IOException e) {
 			plugin.getLogger().severe("Error creating Champion file for: " + name);
 			e.printStackTrace();
@@ -103,7 +105,7 @@ public class Champion {
 
 	public void saveStatsToFile() {
 		if (!hasFile()) createFile();
-		File file = new File(plugin.getDataFolder(), "/Champions/" + name + ".yml");
+		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
 		FileConfiguration yml = YamlConfiguration.loadConfiguration(file);
 		yml.set("Strength", strength);
 		yml.set("Agility", agility);
@@ -149,7 +151,7 @@ public class Champion {
 
 	public void loadStatsFromFile() {
 		if (!hasFile()) createFile();
-		File file = new File(plugin.getDataFolder(), "/Champions/" + name + ".yml");
+		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
 		FileConfiguration yml = YamlConfiguration.loadConfiguration(file);
 		strength = yml.getInt("Strength");
 		agility = yml.getInt("Agility");
@@ -181,14 +183,14 @@ public class Champion {
 		deathsToEnvironment = yml.getInt("DeathsToEnvironment");
 		mobsKilled = yml.getInt("TotalMobsKilled");
 		bossesKilled = yml.getInt("BossesKilled");
-		if (!(yml.get("MobTypesKilled") instanceof String)) {
+/*		if (!(yml.get("MobTypesKilled") instanceof String)) {
 			for (String s : yml.getConfigurationSection("MobTypesKilled").getKeys(false)) {
 				mobTypesKilled.put(s, yml.getInt("MobTypesKilled." + s));
 			}
 		}
 		else {
 			mobTypesKilled.clear();
-		}
+		} */
 	}
 
 	public int getStrength() {
