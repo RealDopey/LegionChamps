@@ -2,7 +2,6 @@ package net.goldenapplemc.LegionChamps;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -27,10 +26,12 @@ public class Champion {
 
 	private int gold = 0;
 	private int damageDone = 0;
+	private int damageTaken = 0;
 	private int expGained = 0;
 	private int playersKilled = 0;
 	private int killStreaks = 0;
 	private int highestStreak = 0;
+	private int highestMultikill = 0;
 	private int totalGold = 0;
 	private int goldFromMonsters = 0;
 	private int goldFromShops = 0;
@@ -41,7 +42,6 @@ public class Champion {
 	private int deathsToMonsters = 0;
 	private int deathsToEnvironment = 0;
 	private int mobsKilled = 0;
-	private HashMap<String, Integer> mobTypesKilled = new HashMap<String, Integer>();
 	private int bossesKilled = 0;
 
 	public Champion(LegionChamps plugin, String name) {
@@ -80,6 +80,7 @@ public class Champion {
 			yml.set("GoldFind", stats.getDouble("GoldFind"));
 
 			yml.set("DamageDone", 0);
+			yml.set("DamageTaken", 0);
 			yml.set("ExpGained", 0);
 			yml.set("PlayersKilled", 0);
 			yml.set("KillStreaks", 0);
@@ -95,7 +96,6 @@ public class Champion {
 			yml.set("DeathsToEnvironment", 0);
 			yml.set("TotalMobsKilled", 0);
 			yml.set("BossesKilled", 0);
-			yml.set("MobTypesKilled", "none");
 			yml.save(file);
 		} catch (IOException e) {
 			plugin.getLogger().severe("Error creating Champion file for: " + name);
@@ -122,6 +122,7 @@ public class Champion {
 		yml.set("GoldFind", goldFind);
 
 		yml.set("DamageDone", damageDone);
+		yml.set("DamageTaken", damageTaken);
 		yml.set("ExpGained", expGained);
 		yml.set("PlayersKilled", playersKilled);
 		yml.set("KillStreaks", killStreaks);
@@ -137,10 +138,6 @@ public class Champion {
 		yml.set("DeathsToEnvironment", deathsToEnvironment);
 		yml.set("TotalMobsKilled", mobsKilled);
 		yml.set("BossesKilled", bossesKilled);
-		for (String s : mobTypesKilled.keySet()) {
-			yml.set("MobTypesKilled." + s, mobTypesKilled.get(s));
-		}
-		if (mobTypesKilled.isEmpty()) yml.set("MobTypesKilled", "none"); 
 		try {
 			yml.save(file);
 		} catch (IOException e) {
@@ -153,7 +150,7 @@ public class Champion {
 		if (!hasFile()) createFile();
 		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
 		FileConfiguration yml = YamlConfiguration.loadConfiguration(file);
-		strength = yml.getInt("Strength");
+		setStrength(yml.getInt("Strength"));
 		agility = yml.getInt("Agility");
 		endurance = yml.getInt("Endurance");
 		precision = yml.getInt("Precision");
@@ -168,6 +165,7 @@ public class Champion {
 		goldFind = yml.getInt("GoldFind");
 		
 		damageDone = yml.getInt("DamageDone");
+		damageTaken = yml.getInt("DamageTaken");
 		expGained = yml.getInt("ExpGained");
 		playersKilled = yml.getInt("PlayersKilled");
 		killStreaks = yml.getInt("KillStreaks");
@@ -183,14 +181,6 @@ public class Champion {
 		deathsToEnvironment = yml.getInt("DeathsToEnvironment");
 		mobsKilled = yml.getInt("TotalMobsKilled");
 		bossesKilled = yml.getInt("BossesKilled");
-/*		if (!(yml.get("MobTypesKilled") instanceof String)) {
-			for (String s : yml.getConfigurationSection("MobTypesKilled").getKeys(false)) {
-				mobTypesKilled.put(s, yml.getInt("MobTypesKilled." + s));
-			}
-		}
-		else {
-			mobTypesKilled.clear();
-		} */
 	}
 
 	public int getStrength() {
@@ -310,6 +300,10 @@ public class Champion {
 	public int getDamageDone() {
 		return damageDone;
 	}
+	
+	public int getDamageTaken() {
+		return damageTaken;
+	}
 
 	public int getTotalExpEarned() {
 		return expGained;
@@ -325,6 +319,10 @@ public class Champion {
 
 	public int getHighestStreak() {
 		return highestStreak;
+	}
+	
+	public int getHighestMultikill() {
+		return highestMultikill;
 	}
 
 	public int getTotalGoldEarned() {
@@ -367,16 +365,16 @@ public class Champion {
 		return mobsKilled;
 	}
 
-	public HashMap<String, Integer> getMobTypesKilled() {
-		return mobTypesKilled;
-	}
-
 	public int getBossesKilled() {
 		return bossesKilled;
 	}
 
 	public void setDamageDone(int value) {
 		damageDone = value;
+	}
+	
+	public void setDamageTaken(int value) {
+		damageTaken = value;
 	}
 
 	public void setTotalExpGained(int value) {
@@ -393,6 +391,10 @@ public class Champion {
 
 	public void setHighestStreak(int value) {
 		highestStreak = value;
+	}
+	
+	public void setHighestMultikill(int value) {
+		highestMultikill = value;
 	}
 
 	public void setTotalGoldEarned(int value) {
@@ -433,10 +435,6 @@ public class Champion {
 
 	public void setTotalMobsKilled(int value) {
 		mobsKilled = value;
-	}
-
-	public void setMobTypesKilled(HashMap<String, Integer> value) {
-		mobTypesKilled = value;
 	}
 
 	public void setBossesKilled(int value) {

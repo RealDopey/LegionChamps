@@ -20,7 +20,7 @@ public class PlayerListener implements Listener {
 		Champion diedC = this.plugin.getChampion(died.getName());
 		diedC.setTotalDeaths(diedC.getTotalDeaths() + 1);
 		if (event.getEntity().getKiller() != null) {
-			if ((event.getEntity().getKiller() instanceof Player)) {
+			if (event.getEntity().getKiller() instanceof Player) {
 				Player p = event.getEntity().getKiller();
 				Champion c = this.plugin.getChampion(p.getName());
 				c.setPlayersKilled(c.getPlayersKilled() + 1);
@@ -28,10 +28,10 @@ public class PlayerListener implements Listener {
 				diedC.setDeathsToPlayers(diedC.getDeathsToPlayers() + 1);
 			}
 
-			if ((event.getEntity().getKiller() instanceof Projectile)) {
-				Projectile projectile = (Projectile)event.getEntity().getKiller();
-				if ((projectile.getShooter() instanceof Player)) {
-					Player p = (Player)projectile.getShooter();
+			else if (event.getEntity().getKiller() instanceof Projectile) {
+				Projectile projectile = (Projectile) event.getEntity().getKiller();
+				if (projectile.getShooter() instanceof Player) {
+					Player p = (Player) projectile.getShooter();
 					Champion c = this.plugin.getChampion(p.getName());
 					c.setPlayersKilled(c.getPlayersKilled() + 1);
 
