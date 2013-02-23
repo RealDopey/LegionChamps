@@ -1,10 +1,6 @@
 package net.goldenapplemc.LegionChamps;
 
-import java.lang.reflect.Field;
-
-import net.minecraft.server.v1_4_R1.EntityPlayer;
-
-import org.bukkit.craftbukkit.v1_4_R1.entity.CraftEntity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -35,31 +31,32 @@ public class ChampionHealth implements Listener {
 			e.setCancelled(true);
 	}
 
-	public void removeHealth(Player p, int amount, String reason, Player killer) {
-		if(reason.equalsIgnoreCase("Player")) {
-			setKiller(p, killer);
-		}
+	public void removeHealth(Player p, int amount, String reason, LivingEntity damager) {
 		Champion c = plugin.getChampion(p.getName());
 		int hp = c.getHp();
 		c.setHp(hp - amount);
 		if(c.getHp() <= 0) {
-			p.setHealth(0);
-			c.setHp(c.getMaxHp());
+			if(damager == null) killPlayer(p, null);
+			else {
+				killPlayer(p, damager); 
+			}
 		}
 	}
 
-	public void setKiller(Player p, Player killer) {
-		try {
-			Field underlyingEntityField = CraftEntity.class.getDeclaredField("entity");
-			underlyingEntityField.setAccessible(true);
-			Object underlyingPlayerObj = underlyingEntityField.get(p);
-			if(underlyingPlayerObj instanceof EntityPlayer) {
-				EntityPlayer underlyingPlayer = (EntityPlayer) underlyingPlayerObj;
-				underlyingPlayer.killer = (EntityPlayer) killer;
-			}
+	public void killPlayer(Player p, LivingEntity killer) {
+		p.setHealth(0);
+		Champion c = plugin.getChampion(p.getName());
+		c.setTotalDeaths(c.getTotalDeaths() + 1);
+		c.setHp(c.getMaxHp());
+		if(killer == null) c.setDeathsToEnvironment(c.getDeathsToEnvironment() + 1);
+		else if(killer instanceof Player) {
+			Player killerP = (Player) killer;
+			Champion killerC = plugin.getChampion(killerP.getName());
+			killerC.setPlayersKilled(killerC.getPlayersKilled() + 1);
+			c.setDeathsToPlayers(c.getDeathsToPlayers() + 1);
 		}
-		catch(Exception e) {
-			plugin.getLogger().severe("Reflection to set killer failed! Kill and death stats not being logged!");
+		else {
+			c.setDeathsToMonsters(c.getDeathsToMonsters() + 1);
 		}
 	}
 }
