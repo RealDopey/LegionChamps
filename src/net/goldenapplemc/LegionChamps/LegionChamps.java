@@ -12,12 +12,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class LegionChamps extends JavaPlugin implements Listener {
 	private HashMap<String, Champion> champions = new HashMap<String, Champion>();
-	public BookGUI bookGUI = new BookGUI(this);
+	private BookGUI bookGUI = new BookGUI(this);
+	private ChampionHealth health = new ChampionHealth(this);
 	public void onEnable() { 
 		saveDefaultConfig();
 		getServer().getPluginManager().registerEvents(this, this);
-		getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
 		getServer().getPluginManager().registerEvents(bookGUI, this);
+		getServer().getPluginManager().registerEvents(health, this);
 		new BukkitRunnable() {
 			public void run() {
 				for (Champion c : champions.values()) {
@@ -37,6 +38,10 @@ public class LegionChamps extends JavaPlugin implements Listener {
 			return (Champion)champions.get(name);
 		}
 		return new Champion(this, name);
+	}
+	
+	public ChampionHealth getHealthManager() {
+		return health;
 	}
 	
 	@EventHandler

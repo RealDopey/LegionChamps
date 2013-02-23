@@ -169,6 +169,11 @@ public class BookGUI implements Listener {
 		}
 	}
 	
+/*	@EventHandler
+	public void onBookOpen(PlayerInteractEvent event) {
+		
+	} */
+	
 	@EventHandler
 	public void onDeath(PlayerDeathEvent event) {
 		ItemStack i = null;
@@ -191,6 +196,6 @@ public class BookGUI implements Listener {
 					giveBookTo(event.getPlayer());
 				}
 			}
-		}.runTaskLater(plugin, 10);// Half a second later because this fires before actual respawn
+		}.runTaskLater(plugin, 1);
 	}
 }
