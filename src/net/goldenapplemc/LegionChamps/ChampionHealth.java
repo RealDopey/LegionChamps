@@ -5,25 +5,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 
 public class ChampionHealth implements Listener {
 	LegionChamps plugin;
 	public ChampionHealth(LegionChamps plugin) {
 		this.plugin = plugin;
-	}
-	@EventHandler(priority=EventPriority.LOWEST, ignoreCancelled = true)
-	public void showHealthPercentage(EntityDamageByEntityEvent e) {
-		if (e.getEntity() instanceof Player) {
-			Player p = (Player) e.getEntity();
-			Champion c = plugin.getChampion(p.getName());
-			int hearts = (int)(20 / (c.getMaxHp() / c.getHp()));
-			if(hearts == 0) hearts = 1; // Make sure they don't die unless we want them to
-			p.setHealth(hearts);
-			e.setDamage(0);
-			removeHealth(p, 4, (LivingEntity) e.getDamager());
-		}
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -36,6 +23,9 @@ public class ChampionHealth implements Listener {
 		Champion c = plugin.getChampion(p.getName());
 		int hp = c.getHp();
 		c.setHp(hp - amount);
+		int hearts = (int)(20 / (c.getMaxHp() / c.getHp())); // Calculate percent of hp in hearts where 20 is max (10 hearts = 20 half hearts)
+		if(hearts == 0) hearts = 1; // Make sure they don't die unless we want them to
+		p.setHealth(hearts); // Set MC health to display percentage of current health
 		if(hp - amount <= 0) {
 			if(damager == null) killPlayer(p, null);
 			else {
