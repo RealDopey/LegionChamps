@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -41,40 +42,13 @@ public class BookGUI implements Listener {
 	public void giveBookTo(Player p) {
 		ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK, 1);
 		BookMeta book = (BookMeta) bookItem.getItemMeta();
-		Champion c = plugin.getChampion(p.getName());
 		book.setTitle(ChatColor.LIGHT_PURPLE + "Champion Info");
 		book.setAuthor("The Legion Master");
-		book.addPage(" " + ChatColor.UNDERLINE + ChatColor.BOLD + "CHAMPION PROFILE" + ChatColor.RESET + " \n\n" +
-				ChatColor.BOLD + "Name: " + ChatColor.RESET + c.name + "\n" +
-				ChatColor.ITALIC + "Title\n" + ChatColor.RESET +
-				ChatColor.BOLD + "Level " + ChatColor.RESET + c.getLevel() + "\n" +
-				" ----------------- " + "\n" +
-				ChatColor.BOLD + "HP: " + ChatColor.RESET + c.getHp() + "/" + c.getMaxHp() + "\n" +
-				ChatColor.BOLD + "Regen: " + ChatColor.RESET + c.getRegen() + "/s\n\n" +
-				ChatColor.BOLD + "STR: " + ChatColor.RESET + c.getStrength() + ChatColor.BOLD + "     PRE: " + ChatColor.RESET + c.getPrecision() + "\n" +
-				ChatColor.BOLD + "AGI: " + ChatColor.RESET + c.getAgility() + ChatColor.BOLD + "      END: " + ChatColor.RESET + c.getEndurance() +
-				" ----------------- " +
-				ChatColor.BOLD + "Gold: " + ChatColor.RESET + c.getGold());
-
-		book.addPage("      " + ChatColor.BOLD + "PvE Stats" + ChatColor.RESET + "   \n\n" +
-				ChatColor.BOLD + "Total Gold: " + ChatColor.RESET + c.getTotalGoldEarned() + "\n" +
-				ChatColor.BOLD + "Gold Spent: " + ChatColor.RESET + c.getTotalGoldSpent() + "\n" +
-				ChatColor.BOLD + "Monsters Killed: " + ChatColor.RESET + c.getTotalMobsKilled() + "\n" +
-				ChatColor.BOLD + "Bosses Killed: " + ChatColor.RESET + c.getBossesKilled() + "\n" +
-				ChatColor.BOLD + "Raids Killed: " + ChatColor.RESET + 0 + "\n" +
-				ChatColor.BOLD + "Damage Dealt: " + ChatColor.RESET + c.getDamageDone() + "\n" +
-				" ----------------- " + 
-				ChatColor.BOLD + ChatColor.RED + "          PvP Stats" + ChatColor.RESET + "   \n\n" +
-				ChatColor.RED + "Kills: " + c.getPlayersKilled() + "    Deaths: " + c.getTotalDeaths() + "\n" +
-				"Rank: " + 0 + "    ELO: " + 0 + "\n" +
-				"Max Multi: " + c.getHighestMultikill() + "\n" +
-				"Max Streak: " + c.getHighestStreak());
-		book.addPage("" + ChatColor.BOLD + ChatColor.RED + "          PvP Stats" + ChatColor.RESET + "   \n" +
-				ChatColor.RED + "Kills: " + c.getPlayersKilled() + "    Deaths: " + c.getTotalDeaths() + "\n" +
-				"Rank: " + 0 + "    ELO: " + 0 + "\n" +
-				"Max Multi: " + c.getHighestMultikill() + "\n" +
-				"Max Streak: " + c.getHighestStreak());
+		book.addPage("");
+		book.addPage("");
+		book.addPage("");
 		bookItem.setItemMeta(book);
+		bookItem.setItemMeta(getBookForPlayer(p, bookItem));
 		p.getInventory().addItem(bookItem);
 	}
 
@@ -168,12 +142,18 @@ public class BookGUI implements Listener {
 			}
 		}
 	}
-	
-/*	@EventHandler
+
+	@EventHandler
 	public void onBookOpen(PlayerInteractEvent event) {
-		
-	} */
-	
+		if(event.getItem() != null) {
+			if(event.getItem().getType() == Material.WRITTEN_BOOK) {
+				BookMeta book = (BookMeta) event.getItem().getItemMeta();
+				if(ChatColor.stripColor(book.getTitle()).equalsIgnoreCase("Champion Info")) {
+					event.getItem().setItemMeta(getBookForPlayer(event.getPlayer(), event.getItem()));
+				}
+			}
+		}
+	}
 	@EventHandler
 	public void onDeath(PlayerDeathEvent event) {
 		ItemStack i = null;
@@ -187,7 +167,7 @@ public class BookGUI implements Listener {
 		}
 		event.getDrops().remove(i);
 	}
-	
+
 	@EventHandler
 	public void onRespawn(final PlayerRespawnEvent event) {
 		new BukkitRunnable() {
@@ -196,6 +176,6 @@ public class BookGUI implements Listener {
 					giveBookTo(event.getPlayer());
 				}
 			}
-		}.runTaskLater(plugin, 1);
+		}.runTaskLater(plugin, 3);
 	}
 }

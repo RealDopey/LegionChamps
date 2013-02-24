@@ -13,16 +13,16 @@ public class ChampionHealth implements Listener {
 	public ChampionHealth(LegionChamps plugin) {
 		this.plugin = plugin;
 	}
-	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority=EventPriority.LOWEST, ignoreCancelled = true)
 	public void showHealthPercentage(EntityDamageByEntityEvent e) {
 		if (e.getEntity() instanceof Player) {
 			Player p = (Player) e.getEntity();
-			p.sendMessage("EntityDamageByEntityEvent");
 			Champion c = plugin.getChampion(p.getName());
 			int hearts = (int)(20 / (c.getMaxHp() / c.getHp()));
 			if(hearts == 0) hearts = 1; // Make sure they don't die unless we want them to
 			p.setHealth(hearts);
 			e.setDamage(0);
+			removeHealth(p, 4, (LivingEntity) e.getDamager());
 		}
 	}
 
@@ -33,11 +33,9 @@ public class ChampionHealth implements Listener {
 	}
 
 	public void removeHealth(Player p, int amount, LivingEntity damager) {
-		p.sendMessage("Health removed from you!");
 		Champion c = plugin.getChampion(p.getName());
 		int hp = c.getHp();
 		c.setHp(hp - amount);
-		p.sendMessage("HP: " +c.getHp());
 		if(hp - amount <= 0) {
 			if(damager == null) killPlayer(p, null);
 			else {
@@ -47,7 +45,6 @@ public class ChampionHealth implements Listener {
 	}
 
 	public void killPlayer(Player p, LivingEntity killer) {
-		p.sendMessage("Kill Player was fired on you");
 		p.setHealth(0);
 		Champion c = plugin.getChampion(p.getName());
 		c.setTotalDeaths(c.getTotalDeaths() + 1);
