@@ -256,6 +256,7 @@ public class Champion {
 	}
 
 	public void setHp(int value) {
+		if(value > getMaxHp()) value = getMaxHp(); // Don't let hp go above max
 		hp = value;
 	}
 

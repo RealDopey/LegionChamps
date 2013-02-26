@@ -1,16 +1,22 @@
 package net.goldenapplemc.LegionChamps;
 
+import java.util.HashMap;
+
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class ChampionHealth implements Listener {
 	LegionChamps plugin;
+	HashMap<String, Long> lastCombatTimes = new HashMap<String, Long>();
 	public ChampionHealth(LegionChamps plugin) {
 		this.plugin = plugin;
+		// Add regen
+		startRegen();
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -21,12 +27,18 @@ public class ChampionHealth implements Listener {
 
 	public void removeHealth(Player p, int amount, LivingEntity damager) {
 		Champion c = plugin.getChampion(p.getName());
-		int hp = c.getHp();
-		c.setHp(hp - amount);
+		if(damager != null) { // Null means damage done by environment, like fall. Otherwise it will be combat and needs to stop regen
+			lastCombatTimes.put(c.name, System.currentTimeMillis());
+			if(damager instanceof Player) {
+				Player player = (Player) damager;
+				lastCombatTimes.put(player.getName(), System.currentTimeMillis());
+			}
+		}
+		c.setHp(c.getHp() - amount);
 		int hearts = (int)(20 / (c.getMaxHp() / c.getHp())); // Calculate percent of hp in hearts where 20 is max (10 hearts = 20 half hearts)
 		if(hearts == 0) hearts = 1; // Make sure they don't die unless we want them to
 		p.setHealth(hearts); // Set MC health to display percentage of current health
-		if(hp - amount <= 0) {
+		if(c.getHp() <= 0) {
 			if(damager == null) killPlayer(p, null);
 			else {
 				killPlayer(p, damager); 
@@ -49,5 +61,27 @@ public class ChampionHealth implements Listener {
 		else {
 			c.setDeathsToMonsters(c.getDeathsToMonsters() + 1);
 		}
+	}
+
+	public void startRegen() {
+		final int reset = plugin.getConfig().getInt("Regen_Reset") * 1000;
+		new BukkitRunnable() {
+			public void run() {
+				for(Player p : plugin.getServer().getOnlinePlayers()) {
+					String name = p.getName();
+					Champion c = plugin.getChampion(name);
+					long time = System.currentTimeMillis();
+					if(lastCombatTimes.containsKey(name)) {
+						long lastTime = lastCombatTimes.get(name);
+						if(time - lastTime >= reset) { // Been out of combat long enough
+							c.setHp(c.getHp() + c.getRegen()); // Add amount of regen to hp
+						}
+					}
+					else {
+						c.setHp(c.getHp() + c.getRegen()); // Add amount of regen to hp
+					}
+				}
+			}
+		}.runTaskTimer(plugin, 10, 10); // Run every half second
 	}
 }

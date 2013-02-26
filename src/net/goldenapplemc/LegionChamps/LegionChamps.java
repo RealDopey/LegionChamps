@@ -25,7 +25,7 @@ public class LegionChamps extends JavaPlugin implements Listener {
 					c.saveStatsToFile();
 				}
 			}
-		}.runTaskTimerAsynchronously(this, 20*60, 20*60);
+		}.runTaskTimer(this, 20*60, 20*60);
 	}
 	public void onDisable() {
 		for (Champion c : champions.values()) {
