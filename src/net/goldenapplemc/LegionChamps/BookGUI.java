@@ -8,8 +8,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -39,6 +37,18 @@ public class BookGUI implements Listener {
 		return hasBook;
 	}
 
+	public ItemStack getBook(Player p) {
+		for(ItemStack i : ((Player) p).getInventory().getContents()) {
+			if(i.getType() == Material.WRITTEN_BOOK) {
+				BookMeta meta = (BookMeta) i.getItemMeta();
+				if(ChatColor.stripColor(meta.getTitle()).equalsIgnoreCase("Champion Info")) {
+					return i;
+				}
+			}
+		}
+		return null;
+	}
+
 	public void giveBookTo(Player p) {
 		ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK, 1);
 		BookMeta book = (BookMeta) bookItem.getItemMeta();
@@ -48,13 +58,12 @@ public class BookGUI implements Listener {
 		book.addPage("");
 		book.addPage("");
 		bookItem.setItemMeta(book);
-		bookItem.setItemMeta(getBookForPlayer(p, bookItem));
+		bookItem.setItemMeta(getBookMeta(plugin.getChampion(p.getName()), bookItem));
 		p.getInventory().addItem(bookItem);
 	}
 
-	public BookMeta getBookForPlayer(Player p, ItemStack bookItem) {
+	public BookMeta getBookMeta(Champion c, ItemStack bookItem) {
 		BookMeta book = (BookMeta) bookItem.getItemMeta();
-		Champion c = plugin.getChampion(p.getName());
 		book.setTitle(ChatColor.LIGHT_PURPLE + "Champion Info");
 		book.setAuthor("The Legion Master");
 		book.setPage(1, " " + ChatColor.UNDERLINE + ChatColor.BOLD + "CHAMPION PROFILE" + ChatColor.RESET + " \n\n" +
@@ -63,7 +72,7 @@ public class BookGUI implements Listener {
 				ChatColor.BOLD + "Level " + ChatColor.RESET + c.getLevel() + "\n" +
 				" ----------------- " + "\n" +
 				ChatColor.BOLD + "HP: " + ChatColor.RESET + c.getHp() + "/" + c.getMaxHp() + "\n" +
-				ChatColor.BOLD + "Regen: " + ChatColor.RESET + c.getRegen() + "/s\n\n" +
+				ChatColor.BOLD + "Regen: " + ChatColor.RESET + c.getRegen() * 2 + "/s\n\n" +
 				ChatColor.BOLD + "STR: " + ChatColor.RESET + c.getStrength() + ChatColor.BOLD + "      PRE: " + ChatColor.RESET + c.getPrecision() + "\n" +
 				ChatColor.BOLD + "AGI: " + ChatColor.RESET + c.getAgility() + ChatColor.BOLD + "      END: " + ChatColor.RESET + c.getEndurance() +
 				" ----------------- " +
@@ -82,7 +91,6 @@ public class BookGUI implements Listener {
 				"Rank: " + 0 + "    ELO: " + 0 + "\n" +
 				"Max Multi: " + c.getHighestMultikill() + "\n" +
 				"Max Streak: " + c.getHighestStreak());
-
 		return book;
 	}
 	// DOESNT WORK WTF BRUH
@@ -111,18 +119,6 @@ public class BookGUI implements Listener {
 	}
 
 	@EventHandler
-	public void onSelectBook(PlayerItemHeldEvent event) {
-		int i = event.getNewSlot();
-		Player p = event.getPlayer();
-		if(p.getInventory().getItem(i) != null && p.getInventory().getItem(i).getType() == Material.WRITTEN_BOOK) {
-			BookMeta book = (BookMeta) p.getInventory().getItem(i).getItemMeta();
-			if(ChatColor.stripColor(book.getTitle()).equalsIgnoreCase("Champion Info")) {
-				p.getInventory().getItem(i).setItemMeta(getBookForPlayer(p, p.getInventory().getItem(i)));
-			}
-		}
-	}
-
-	@EventHandler
 	public void onItemDrop(PlayerDropItemEvent event) {
 		if(event.getItemDrop().getItemStack().getType() == Material.WRITTEN_BOOK) {
 			BookMeta book = (BookMeta) event.getItemDrop().getItemStack().getItemMeta();
@@ -135,21 +131,11 @@ public class BookGUI implements Listener {
 
 	@EventHandler
 	public void onItemSelect(InventoryClickEvent event) {
-		if(event.getCurrentItem().getType() == Material.WRITTEN_BOOK) {
-			BookMeta book = (BookMeta) event.getCurrentItem().getItemMeta();
-			if(ChatColor.stripColor(book.getTitle()).equalsIgnoreCase("Champion Info")) {
-				event.setCancelled(true);
-			}
-		}
-	}
-
-	@EventHandler
-	public void onBookOpen(PlayerInteractEvent event) {
-		if(event.getItem() != null) {
-			if(event.getItem().getType() == Material.WRITTEN_BOOK) {
-				BookMeta book = (BookMeta) event.getItem().getItemMeta();
+		if(event.getCurrentItem() != null) {
+			if(event.getCurrentItem().getType() == Material.WRITTEN_BOOK) {
+				BookMeta book = (BookMeta) event.getCurrentItem().getItemMeta();
 				if(ChatColor.stripColor(book.getTitle()).equalsIgnoreCase("Champion Info")) {
-					event.getItem().setItemMeta(getBookForPlayer(event.getPlayer(), event.getItem()));
+					event.setCancelled(true);
 				}
 			}
 		}

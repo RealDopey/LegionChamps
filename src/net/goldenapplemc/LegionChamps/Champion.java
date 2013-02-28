@@ -2,9 +2,13 @@ package net.goldenapplemc.LegionChamps;
 
 import java.io.File;
 import java.io.IOException;
+
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class Champion {
 	LegionChamps plugin;
@@ -150,20 +154,20 @@ public class Champion {
 		if (!hasFile()) createFile();
 		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
 		FileConfiguration yml = YamlConfiguration.loadConfiguration(file);
-		setStrength(yml.getInt("Strength"));
-		setAgility(yml.getInt("Agility"));
-		setEndurance(yml.getInt("Endurance"));
-		setPrecision(yml.getInt("Precision"));
-		setHp(yml.getInt("Health"));
-		setMaxHp(yml.getInt("MaxHealth"));
-		setRegen(yml.getInt("Regen"));
-		setLevel(yml.getInt("Level"));
-		setExp(yml.getInt("Exp"));
-		setCritChance(yml.getDouble("CritChance"));
+		strength = yml.getInt("Strength");
+		agility = yml.getInt("Agility");
+		endurance = yml.getInt("Endurance");
+		precision = yml.getInt("Precision");
+		hp = yml.getInt("Health");
+		maxHp = yml.getInt("MaxHealth");
+		regen = yml.getInt("Regen");
+		level = yml.getInt("Level");
+		exp = yml.getInt("Exp");
+		crit = yml.getDouble("CritChance");
 		dodge = yml.getDouble("DodgeChance");
 		itemFind = yml.getDouble("ItemFind");
 		goldFind = yml.getDouble("GoldFind");
-		
+
 		damageDone = yml.getInt("DamageDone");
 		damageTaken = yml.getInt("DamageTaken");
 		expGained = yml.getInt("ExpGained");
@@ -181,6 +185,7 @@ public class Champion {
 		deathsToEnvironment = yml.getInt("DeathsToEnvironment");
 		mobsKilled = yml.getInt("TotalMobsKilled");
 		bossesKilled = yml.getInt("BossesKilled");
+		updateBookInInv();
 	}
 
 	public int getStrength() {
@@ -241,56 +246,69 @@ public class Champion {
 
 	public void setStrength(int value) {
 		strength = value;
+		updateBookInInv();
 	}
 
 	public void setAgility(int value) {
 		agility = value;
+		updateBookInInv();
 	}
 
 	public void setEndurance(int value) {
 		endurance = value;
+		updateBookInInv();
 	}
 
 	public void setPrecision(int value) {
 		precision = value;
+		updateBookInInv();
 	}
 
 	public void setHp(int value) {
 		if(value > getMaxHp()) value = getMaxHp(); // Don't let hp go above max
 		hp = value;
+		updateBookInInv();
 	}
 
 	public void setMaxHp(int value) {
 		maxHp = value;
+		updateBookInInv();
 	}
 
 	public void setRegen(int value) {
 		regen = value;
+		updateBookInInv();
 	}
 
 	public void setLevel(int value) {
 		if(value > 200) value = 200;
 		level = value;
+		updateBookInInv();
 	}
 
 	public void setExp(int value) {
 		exp = value;
+		updateBookInInv();
 	}
 
 	public void setCritChance(double value) {
 		crit = value;
+		updateBookInInv();
 	}
 
 	public void setDodgeChance(double value) {
 		dodge = value;
+		updateBookInInv();
 	}
 
 	public void setItemFind(double value) {
 		itemFind = value;
+		updateBookInInv();
 	}
 
 	public void setGoldFind(double value) {
 		goldFind = value;
+		updateBookInInv();
 	}
 
 	public int getGold()
@@ -301,7 +319,7 @@ public class Champion {
 	public int getDamageDone() {
 		return damageDone;
 	}
-	
+
 	public int getDamageTaken() {
 		return damageTaken;
 	}
@@ -321,7 +339,7 @@ public class Champion {
 	public int getHighestStreak() {
 		return highestStreak;
 	}
-	
+
 	public int getHighestMultikill() {
 		return highestMultikill;
 	}
@@ -372,73 +390,102 @@ public class Champion {
 
 	public void setDamageDone(int value) {
 		damageDone = value;
+		updateBookInInv();
 	}
-	
+
 	public void setDamageTaken(int value) {
 		damageTaken = value;
+		updateBookInInv();
 	}
 
 	public void setTotalExpGained(int value) {
 		expGained = value;
+		updateBookInInv();
 	}
 
 	public void setPlayersKilled(int value) {
 		playersKilled = value;
+		updateBookInInv();
 	}
 
 	public void setNumberOfStreaks(int value) {
 		killStreaks = value;
+		updateBookInInv();
 	}
 
 	public void setHighestStreak(int value) {
 		highestStreak = value;
+		updateBookInInv();
 	}
-	
+
 	public void setHighestMultikill(int value) {
 		highestMultikill = value;
+		updateBookInInv();
 	}
 
 	public void setTotalGoldEarned(int value) {
 		totalGold = value;
+		updateBookInInv();
 	}
 
 	public void setGoldFromMonsters(int value) {
 		goldFromMonsters = value;
+		updateBookInInv();
 	}
 
 	public void setGoldFromShops(int value) {
 		goldFromShops = value;
+		updateBookInInv();
 	}
 
 	public void setGoldFromTrade(int value) {
 		goldFromTrade = value;
+		updateBookInInv();
 	}
 
 	public void setGoldSpent(int value) {
 		goldSpent = value;
+		updateBookInInv();
 	}
 
 	public void setTotalDeaths(int value) {
 		totalDeaths = value;
+		updateBookInInv();
 	}
 
 	public void setDeathsToPlayers(int value) {
 		deathsToPlayers = value;
+		updateBookInInv();
 	}
 
 	public void setDeathsToMonsters(int value) {
 		deathsToMonsters = value;
+		updateBookInInv();
 	}
 
 	public void setDeathsToEnvironment(int value) {
 		deathsToEnvironment = value;
+		updateBookInInv();
 	}
 
 	public void setTotalMobsKilled(int value) {
 		mobsKilled = value;
+		updateBookInInv();
 	}
 
 	public void setBossesKilled(int value) {
 		bossesKilled = value;
+		updateBookInInv();
+	}
+
+	public void updateBookInInv() {
+		OfflinePlayer p = plugin.getServer().getOfflinePlayer(name);
+		if(p.isOnline()) {
+			if(!plugin.getBookManager().hasBook((Player)p)) {
+				plugin.getBookManager().giveBookTo((Player)p);
+			}
+			ItemStack i = plugin.getBookManager().getBook((Player) p);
+			i.setItemMeta(plugin.getBookManager().getBookMeta(this, i));
+		}
 	}
 }

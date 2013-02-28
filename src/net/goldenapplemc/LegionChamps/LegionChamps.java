@@ -13,9 +13,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class LegionChamps extends JavaPlugin implements Listener {
 	private HashMap<String, Champion> champions = new HashMap<String, Champion>();
 	private BookGUI bookGUI = new BookGUI(this);
-	private ChampionHealth health = new ChampionHealth(this);
+	private ChampionHealth health;
 	public void onEnable() { 
 		saveDefaultConfig();
+		health = new ChampionHealth(this);
 		getServer().getPluginManager().registerEvents(this, this);
 		getServer().getPluginManager().registerEvents(bookGUI, this);
 		getServer().getPluginManager().registerEvents(health, this);
@@ -34,16 +35,20 @@ public class LegionChamps extends JavaPlugin implements Listener {
 	}
 
 	public Champion getChampion(String name) {
-		if (champions.containsKey(name)) {
-			return (Champion)champions.get(name);
+		if (!champions.containsKey(name)) {
+			champions.put(name, new Champion(this, name));
 		}
-		return new Champion(this, name);
+		return champions.get(name);
 	}
-	
+
 	public ChampionHealth getHealthManager() {
 		return health;
 	}
 	
+	public BookGUI getBookManager() {
+		return bookGUI;
+	}
+
 	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		Champion c = getChampion(event.getPlayer().getName());
@@ -57,8 +62,7 @@ public class LegionChamps extends JavaPlugin implements Listener {
 		if (!champions.containsKey(name)) {
 			champions.put(name, new Champion(this, name));
 		}
-		if(!bookGUI.hasBook(p)) {
-			bookGUI.giveBookTo(p);
-		}
+		Champion c = champions.get(name);
+		c.updateBookInInv();
 	}
 }

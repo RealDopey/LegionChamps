@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -17,6 +18,13 @@ public class ChampionHealth implements Listener {
 		this.plugin = plugin;
 		// Add regen
 		startRegen();
+	}
+	
+	@EventHandler
+	public void onHit(EntityDamageByEntityEvent event) {
+		if(event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
+			removeHealth((Player)event.getEntity(), event.getDamage(), (LivingEntity)event.getDamager());
+		}
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -35,9 +43,14 @@ public class ChampionHealth implements Listener {
 			}
 		}
 		c.setHp(c.getHp() - amount);
-		int hearts = (int)(20 / (c.getMaxHp() / c.getHp())); // Calculate percent of hp in hearts where 20 is max (10 hearts = 20 half hearts)
-		if(hearts == 0) hearts = 1; // Make sure they don't die unless we want them to
-		p.setHealth(hearts); // Set MC health to display percentage of current health
+		if(c.getHp() == 0) {
+			p.setHealth(1);
+		}
+		else {
+			int hearts = (int)(20 / (c.getMaxHp() / c.getHp())); // Calculate percent of hp in hearts where 20 is max (10 hearts = 20 half hearts)
+			if(hearts == 0) hearts = 1; // Make sure they don't die unless we want them to
+			p.setHealth(hearts);
+		}
 		if(c.getHp() <= 0) {
 			if(damager == null) killPlayer(p, null);
 			else {
