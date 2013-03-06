@@ -3,6 +3,7 @@ package net.goldenapplemc.LegionChamps;
 import java.io.File;
 import java.io.IOException;
 
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -48,58 +49,33 @@ public class Champion {
 	private int mobsKilled = 0;
 	private int bossesKilled = 0;
 
+	private long lastFight;
+
+	private File file;
+
 	public Champion(LegionChamps plugin, String name) {
 		this.plugin = plugin;
 		this.name = name;
 		config = plugin.getConfig();
+		file = new File(plugin.getDataFolder(), "Champions/" + name + ".yml");
+		createFileIfAbsent();
 		loadStatsFromFile();
 	}
 
-	public boolean hasFile() {
-		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
-		if (file.exists()) return true;
-		return false;
-	}
-
-	public void createFile() {
-		if (hasFile()) return;
-		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
+	public void createFileIfAbsent() {
 		try {
-			file.getParentFile().mkdirs();
-			file.createNewFile();
+			if (!file.createNewFile())
+				return;
 			FileConfiguration yml = YamlConfiguration.loadConfiguration(file);
-			ConfigurationSection stats = config.getConfigurationSection("Default_Stats");
-			yml.set("Strength", stats.getInt("Strength"));
-			yml.set("Agility", stats.getInt("Agility"));
-			yml.set("Endurance", stats.getInt("Endurance"));
-			yml.set("Precision", stats.getInt("Precision"));
-			yml.set("Health", stats.getInt("Health"));
-			yml.set("MaxHealth", stats.getInt("MaxHealth"));
-			yml.set("Regen", stats.getInt("Regen"));
-			yml.set("Level", 0);
-			yml.set("Exp", 0);
-			yml.set("CritChance", stats.getDouble("CritChance"));
-			yml.set("DodgeChance", stats.getDouble("DodgeChance"));
-			yml.set("ItemFind", stats.getDouble("ItemFind"));
-			yml.set("GoldFind", stats.getDouble("GoldFind"));
+			ConfigurationSection defaults = config.getConfigurationSection("Default_Stats");
+			String[] toCopy = new String[] { "Strength", "Agility", "Endurance", "Precision", "Health", "MaxHealth", "Regen", "Level", "Exp", "CritChance",
+					"DodgeChance", "ItemFind", "GoldFind", "DamageDone", "DamageTaken", "ExpGained", "PlayersKilled", "KillStreaks", "HighestKillStreak",
+					"TotalGold", "GoldFromMonsters", "GoldFromShops", "GoldFromTrade", "GoldSpent", "TotalDeaths", "DeathsToPlayers", "DeathsToMonsters",
+					"DeathsToEnvironment", "TotalMobsKilled", "BossesKilled" };
+			for (String att : toCopy) {
+				yml.set(att, defaults.get(att, 0));
+			}
 
-			yml.set("DamageDone", 0);
-			yml.set("DamageTaken", 0);
-			yml.set("ExpGained", 0);
-			yml.set("PlayersKilled", 0);
-			yml.set("KillStreaks", 0);
-			yml.set("HighestKillStreak", 0);
-			yml.set("TotalGold", 0);
-			yml.set("GoldFromMonsters", 0);
-			yml.set("GoldFromShops", 0);
-			yml.set("GoldFromTrade", 0);
-			yml.set("GoldSpent", 0);
-			yml.set("TotalDeaths", 0);
-			yml.set("DeathsToPlayers", 0);
-			yml.set("DeathsToMonsters", 0);
-			yml.set("DeathsToEnvironment", 0);
-			yml.set("TotalMobsKilled", 0);
-			yml.set("BossesKilled", 0);
 			yml.save(file);
 		} catch (IOException e) {
 			plugin.getLogger().severe("Error creating Champion file for: " + name);
@@ -108,8 +84,6 @@ public class Champion {
 	}
 
 	public void saveStatsToFile() {
-		if (!hasFile()) createFile();
-		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
 		FileConfiguration yml = YamlConfiguration.loadConfiguration(file);
 		yml.set("Strength", strength);
 		yml.set("Agility", agility);
@@ -151,8 +125,6 @@ public class Champion {
 	}
 
 	public void loadStatsFromFile() {
-		if (!hasFile()) createFile();
-		File file = new File("plugins/LegionChamps/Champions/" + name + ".yml");
 		FileConfiguration yml = YamlConfiguration.loadConfiguration(file);
 		strength = yml.getInt("Strength");
 		agility = yml.getInt("Agility");
@@ -186,6 +158,17 @@ public class Champion {
 		mobsKilled = yml.getInt("TotalMobsKilled");
 		bossesKilled = yml.getInt("BossesKilled");
 		updateBookInInv();
+	}
+
+	public void updateBookInInv() {
+		OfflinePlayer p = plugin.getServer().getOfflinePlayer(name);
+		if (p.isOnline()) {
+			if (!plugin.getBookManager().hasBook((Player) p)) {
+				plugin.getBookManager().giveBookTo((Player) p);
+			}
+			ItemStack i = plugin.getBookManager().getBook((Player) p);
+			i.setItemMeta(plugin.getBookManager().getBookMeta(this, i));
+		}
 	}
 
 	public int getStrength() {
@@ -264,11 +247,14 @@ public class Champion {
 		updateBookInInv();
 	}
 
-	public void setHp(int value, boolean regen) {
-		if(value > getMaxHp()) value = getMaxHp(); // Don't let hp go above max
+	public void setHp(int value) {
+		if (value > getMaxHp())
+			value = getMaxHp(); // Don't let hp go above max
 		hp = value;
-		if(!regen)
-			updateBookInInv();
+
+		Bukkit.getPlayer(name).setHealth(Math.max(1, (int) (20 * (hp / (getMaxHp() * 1.0d)))));
+
+		updateBookInInv();
 	}
 
 	public void setMaxHp(int value) {
@@ -282,7 +268,8 @@ public class Champion {
 	}
 
 	public void setLevel(int value) {
-		if(value > 200) value = 200;
+		if (value > 200)
+			value = 200;
 		level = value;
 		updateBookInInv();
 	}
@@ -312,8 +299,7 @@ public class Champion {
 		updateBookInInv();
 	}
 
-	public int getGold()
-	{
+	public int getGold() {
 		return gold;
 	}
 
@@ -479,14 +465,12 @@ public class Champion {
 		updateBookInInv();
 	}
 
-	public void updateBookInInv() {
-		OfflinePlayer p = plugin.getServer().getOfflinePlayer(name);
-		if(p.isOnline()) {
-			if(!plugin.getBookManager().hasBook((Player)p)) {
-				plugin.getBookManager().giveBookTo((Player)p);
-			}
-			ItemStack i = plugin.getBookManager().getBook((Player) p);
-			i.setItemMeta(plugin.getBookManager().getBookMeta(this, i));
-		}
+	public long getLastFight() {
+		return lastFight;
 	}
+
+	public void updateLastFight() {
+		lastFight = System.currentTimeMillis();
+	}
+
 }
