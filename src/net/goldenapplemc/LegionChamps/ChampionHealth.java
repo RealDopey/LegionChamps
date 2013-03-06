@@ -42,7 +42,7 @@ public class ChampionHealth implements Listener {
 				lastCombatTimes.put(player.getName(), System.currentTimeMillis());
 			}
 		}
-		c.setHp(c.getHp() - amount);
+		c.setHp(c.getHp() - amount, false);
 		if(c.getHp() == 0) {
 			p.setHealth(1);
 		}
@@ -63,7 +63,7 @@ public class ChampionHealth implements Listener {
 		p.setHealth(0);
 		Champion c = plugin.getChampion(p.getName());
 		c.setTotalDeaths(c.getTotalDeaths() + 1);
-		c.setHp(c.getMaxHp());
+		c.setHp(c.getMaxHp(), false);
 		if(killer == null) c.setDeathsToEnvironment(c.getDeathsToEnvironment() + 1);
 		else if(killer instanceof Player) {
 			Player killerP = (Player) killer;
@@ -87,11 +87,11 @@ public class ChampionHealth implements Listener {
 					if(lastCombatTimes.containsKey(name)) {
 						long lastTime = lastCombatTimes.get(name);
 						if(time - lastTime >= reset) { // Been out of combat long enough
-							c.setHp(c.getHp() + c.getRegen()); // Add amount of regen to hp
+							c.setHp(c.getHp() + c.getRegen(), true); // Add amount of regen to hp
 						}
 					}
 					else {
-						c.setHp(c.getHp() + c.getRegen()); // Add amount of regen to hp
+						c.setHp(c.getHp() + c.getRegen(), true); // Add amount of regen to hp
 					}
 				}
 			}

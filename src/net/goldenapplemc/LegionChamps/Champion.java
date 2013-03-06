@@ -264,10 +264,11 @@ public class Champion {
 		updateBookInInv();
 	}
 
-	public void setHp(int value) {
+	public void setHp(int value, boolean regen) {
 		if(value > getMaxHp()) value = getMaxHp(); // Don't let hp go above max
 		hp = value;
-		updateBookInInv();
+		if(!regen)
+			updateBookInInv();
 	}
 
 	public void setMaxHp(int value) {
